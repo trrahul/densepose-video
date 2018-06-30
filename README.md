@@ -1,2 +1,2 @@
-# detectron-mocap
+# detectron-motion transfer
 
