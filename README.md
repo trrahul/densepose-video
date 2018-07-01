@@ -23,4 +23,4 @@ Note: Requires about 4GB VRAM
 
 
 ##### And a bit of Night city.
-![Alt Text](https://media.giphy.com/media/51Y5HPKDmDOiO2UJac/giphy.gif
+![Alt Text](https://media.giphy.com/media/51Y5HPKDmDOiO2UJac/giphy.gif)
