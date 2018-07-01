@@ -104,8 +104,7 @@ def main(args):
         # )
         # logger.info('Processing {} -> {}'.format(im_name, out_name))
     # print( "capturing video")
-    cap = cv2.VideoCapture('/home/rahul/Documents/densepose/DensePoseData/demo_data/cut.mp4')
-    # cap = cv2.VideoCapture('/home/rahul/Documents/densepose/DensePoseData/demo_data/arnold.jpg')
+    cap = cv2.VideoCapture('video.mp4')
     # pdb.set_trace()
     grab =1;
     if (cap.isOpened()== False): 
@@ -141,7 +140,7 @@ def main(args):
 
         ret = vis_utils.vis_one_image(
             im[:, :, ::-1],  # BGR -> RGB for visualization
-            "dummy_name",
+            "imagename",
             args.output_dir,
             cls_boxes,
             cls_segms,
