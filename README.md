@@ -18,11 +18,9 @@ Note: Requires about 4GB VRAM
 * CUDNN 6
 * opencv 3.4
 
-##### Example, ran on Geralt doing some witcherin' 
-
+##### Example, ran on Geralt doing some witcherin'
 ![Alt Text](https://media.giphy.com/media/dmZFCqQX4kr8MH31qT/giphy.gif)
 
 
-##### And a bit of Night city
-
+##### And a bit of Night city.
 ![Alt Text](https://media.giphy.com/media/51Y5HPKDmDOiO2UJac/giphy.gif
