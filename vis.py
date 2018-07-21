@@ -17,6 +17,7 @@ import numpy as np
 import os
 import pdb
 import pycocotools.mask as mask_util
+import time
 
 from detectron.utils.colormap import colormap
 import detectron.utils.env as envu
@@ -263,6 +264,7 @@ def vis_one_image(
     if segms is not None and len(segms) > 0:
         masks = mask_util.decode(segms)
 
+    optime = time.time()
     color_list = colormap(rgb=True) / 255
 
     kp_lines = kp_connections(dataset_keypoints)
@@ -288,12 +290,12 @@ def vis_one_image(
             continue
 
         # show box (off by default)
-        # ax.add_patch(
-        #     plt.Rectangle((bbox[0], bbox[1]),
-        #                   bbox[2] - bbox[0],
-        #                   bbox[3] - bbox[1],
-        #                   fill=False, edgecolor='g',
-        #                   linewidth=0.5, alpha=box_alpha))
+        ax.add_patch(
+            plt.Rectangle((bbox[0], bbox[1]),
+                          bbox[2] - bbox[0],
+                          bbox[3] - bbox[1],
+                          fill=False, edgecolor='g',
+                          linewidth=0.5, alpha=box_alpha))
 
         if show_class:
             ax.text(
@@ -306,28 +308,28 @@ def vis_one_image(
                 color='white')
 
         # show mask
-        # if segms is not None and len(segms) > i:
-        #     img = np.ones(im.shape)
-        #     color_mask = color_list[mask_color_id % len(color_list), 0:3]
-        #     mask_color_id += 1
+        if segms is not None and len(segms) > i:
+            img = np.ones(im.shape)
+            color_mask = color_list[mask_color_id % len(color_list), 0:3]
+            mask_color_id += 1
 
-        #     w_ratio = .4
-        #     for c in range(3):
-        #         color_mask[c] = color_mask[c] * (1 - w_ratio) + w_ratio
-        #     for c in range(3):
-        #         img[:, :, c] = color_mask[c]
-        #     e = masks[:, :, i]
+            w_ratio = .4
+            for c in range(3):
+                color_mask[c] = color_mask[c] * (1 - w_ratio) + w_ratio
+            for c in range(3):
+                img[:, :, c] = color_mask[c]
+            e = masks[:, :, i]
 
-        #     _, contour, hier = cv2.findContours(
-        #         e.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
+            _, contour, hier = cv2.findContours(
+                e.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
 
-        #     for c in contour:
-        #         polygon = Polygon(
-        #             c.reshape((-1, 2)),
-        #             fill=True, facecolor=color_mask,
-        #             edgecolor='w', linewidth=1.2,
-        #             alpha=0.5)
-        #         ax.add_patch(polygon)
+            for c in contour:
+                polygon = Polygon(
+                    c.reshape((-1, 2)),
+                    fill=True, facecolor=color_mask,
+                    edgecolor='w', linewidth=1.2,
+                    alpha=0.5)
+                ax.add_patch(polygon)
         # show keypoints
         if keypoints is not None and len(keypoints) > i:
             kps = keypoints[i]
@@ -408,61 +410,24 @@ def vis_one_image(
     All_Coords = All_Coords.astype(np.uint8)
     All_inds = All_inds.astype(np.uint8)
     # pdb.set_trace()
-    #
-    # IUV_SaveName = os.path.basename(im_name).split('.')[0]+'_IUV.png'
-    # INDS_SaveName = os.path.basename(im_name).split('.')[0]+'_INDS.png'
-    # cv2.imwrite(os.path.join(output_dir, '{}'.format(IUV_SaveName)), All_Coords )
-    # cv2.imwrite(os.path.join(output_dir, '{}'.format(INDS_SaveName)), All_inds )
-    # print('IUV written to: ' , os.path.join(output_dir, '{}'.format(IUV_SaveName)) )
-    #Detectron processes each image using matpyplot
-    #change figure to numpy data to visualized
-    # image = fig2data(fig)
-    # image = image[...,::-1]
-    # print("figging")
-    # cv2.imshow("img", image)
-    # cv2.waitKey(1)
-
-    # figure = plt.figure(figsize=[12,12])
-    # plt.imshow( image[:,:,::-1] )
+    #draw frame and contours to canvas
     plt.contour( All_Coords[:,:,1]/256.,10, linewidths = 1 )
     plt.contour( All_Coords[:,:,2]/256.,10, linewidths = 1 )
-    plt.contour( All_inds, linewidths = 3 )
-    plt.savefig('vid' + "/file%02d.png" % frame_no)
-    
+    plt.contour( All_inds, linewidths = 3 )    
     plt.axis('off') ; 
     fig.canvas.draw()
-# convert canvas to image
+    # convert canvas to image
     img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
     img  = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
     # img is rgb, convert to opencv's default bgr
     img = cv2.cvtColor(img,cv2.COLOR_RGB2BGR)
-    # display image with opencv or any operation you like
+    # display image with opencv
     cv2.imshow("plot",img)
     cv2.waitKey(1)
-    
-    # output_name = os.path.basename(im_name) + '.' + ext
-    # fig.savefig(os.path.join(output_dir, '{}'.format(output_name)), dpi=dpi)
+    print('\t-Visualized in {: .3f}s'.format(time.time() - optime))
+    output_name = os.path.basename(im_name) + '.' + ext
+    filetime = time.time()
+    fig.savefig(os.path.join(output_dir, '{}'.format(output_name)), dpi=dpi)
+    print('\t-Output file wrote in {: .3f}s'.format(time.time() - filetime))
     plt.close('all')
     return True
-
-
-def fig2data ( fig ):
-    """
-    @brief Convert a Matplotlib figure to a 4D numpy array with RGBA channels and return it
-    @param fig a matplotlib figure
-    @return a numpy 3D array of RGBA values
-    """
-    # draw the renderer
-    fig.canvas.draw( )
- 
-    # Get the RGBA buffer from the figure
-    w,h = fig.canvas.get_width_height()
-    buf = np.fromstring ( fig.canvas.tostring_argb(), dtype=np.uint8 )
-    buf.shape = ( h, w, 4 )
- 
-    # canvas.tostring_argb give pixmap in ARGB mode. Roll the ALPHA channel to have it in RGBA mode
-    buf = np.roll ( buf, 3, axis = 2)
-    buf = buf[:,:,:3]
-
-
-    return buf

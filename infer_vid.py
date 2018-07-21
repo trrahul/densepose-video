@@ -63,19 +63,12 @@ def parse_args():
     parser.add_argument(
         '--output-dir',
         dest='output_dir',
-        help='directory for visualization pdfs (default: /tmp/infer_simple)',
-        default='/tmp/infer_simple',
+        help='Directory to keep the output files',
+        default='/tmp/infer_vid',
         type=str
     )
     parser.add_argument(
-        '--image-ext',
-        dest='image_ext',
-        help='image file name extension (default: jpg)',
-        default='jpg',
-        type=str
-    )
-    parser.add_argument(
-        'im_or_folder', help='image or folder of images', default=None
+        '--file', help='Video file', default=None
     )
     if len(sys.argv) == 1:
         parser.print_help()
@@ -93,45 +86,33 @@ def main(args):
     model = infer_engine.initialize_model_from_cfg(args.weights)
     dummy_coco_dataset = dummy_datasets.get_coco_dataset()
     frame_no =0
-    if os.path.isdir(args.im_or_folder):
-        im_list = glob.iglob(args.im_or_folder + '/*.' + args.image_ext)
-    else:
-        im_list = [args.im_or_folder]
-
-    # for i, im_name in enumerate(im_list):
-        # out_name = os.path.join(
-        #     args.output_dir, '{}'.format(os.path.basename(im_name) + '.pdf')
-        # )
-        # logger.info('Processing {} -> {}'.format(im_name, out_name))
     # print( "capturing video")
-    cap = cv2.VideoCapture('video.mp4')
+    cap = cv2.VideoCapture('/home/rahul/Documents/densepose/DensePoseData/demo_data/style.flv')
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     # pdb.set_trace()
     grab =1;
     if (cap.isOpened()== False): 
         print("Error opening video stream or file")
+        exit
     while (cap.isOpened()):
-        #Fetch image from camera
-        print( "processing image")
+        print( "|Processing Frame {0}/{1} ".format(grab,total_frames))
         grab += 1
+        captime = time.time()
         ret_val, im = cap.read()
+        print('\t-Frame read in{: .3f}s'.format(time.time() - captime))
         if grab%2 ==0:
             continue
-        # gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-        # cv2.imshow('frame',gray)
-        # if cv2.waitKey(1) & 0xFF == ord('q'):
-        #     break
         #uncomment to resize image
         # im = cv2.resize(im, (int(1280/1),int(720/1)))
-
         timers = defaultdict(Timer)
         t = time.time()
         with c2_utils.NamedCudaScope(0):
             cls_boxes, cls_segms, cls_keyps, cls_bodys = infer_engine.im_detect_all(
                 model, im, None, timers=timers
             )
-        logger.info('Inference time: {:.3f}s'.format(time.time() - t))
+        print('\t | Inference time: {:.3f}s'.format(time.time() - t))
         for k, v in timers.items():
-            logger.info(' | {}: {:.3f}s'.format(k, v.average_time))
+            print('\t | {}: {:.3f}s'.format(k, v.average_time))
         if 0:
             logger.info(
                 ' \ Note: inference on the first image will be slower than the '
@@ -140,7 +121,7 @@ def main(args):
 
         ret = vis_utils.vis_one_image(
             im[:, :, ::-1],  # BGR -> RGB for visualization
-            "imagename",
+            "dummy_name",
             args.output_dir,
             cls_boxes,
             cls_segms,
@@ -157,9 +138,7 @@ def main(args):
             frame_no = frame_no +1
     cap.release()
     cv2.destroyAllWindows()
-    os.subprocess.call(
-    'ffmpeg -framerate 20 -i vid/file%02d.png -c:v libx264 -r 30 -pix_fmt yuv420p vid/out.mp4',
-    shell=True)
+
 if __name__ == '__main__':
     workspace.GlobalInit(['caffe2', '--caffe2_log_level=0'])
     setup_logging(__name__)
