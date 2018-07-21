@@ -26,7 +26,7 @@ Additional requirement - ffmpeg
 * Cuda 9.0
 * CUDNN 6
 * opencv 3.4
-* GTX 1050ti
+* GTX 1050 Ti
 * GTX 1080 Ti
 
 ##### Example, ran on Geralt doing some witcherin'
