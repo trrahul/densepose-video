@@ -4,7 +4,7 @@ Put the .py files with your detectron installation.
 
 ##### Use command 
 ```
-python2 tools/infer_simple.py     
+python2 tools/infer_vid.py     
 --cfg configs/DensePose_ResNet101_FPN_s1x-e2e.yaml     
 --output-dir DensePoseData/infer_out/    
 --wts https://s3.amazonaws.com/densepose/DensePose_ResNet101_FPN_s1x-e2e.pkl 
