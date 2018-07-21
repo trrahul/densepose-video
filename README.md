@@ -10,7 +10,8 @@ python2 tools/infer_vid.py
 --wts https://s3.amazonaws.com/densepose/DensePose_ResNet101_FPN_s1x-e2e.pkl 
 --input-file filename
 ```
-Note: Requires about 4GB VRAM
+Note: Requires about 4GB VRAM.
+
 If you use ResNet101_FPN_s1x model, you need more than 4GB of memory.
 If you have only 4GB use ResNet50_FPN_s1x.
 
