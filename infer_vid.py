@@ -68,7 +68,11 @@ def parse_args():
         type=str
     )
     parser.add_argument(
-        '--file', help='Video file', default=None
+        '--input-file',
+        dest='input_file',
+        help='Input video file',
+        type=str,
+        default=None
     )
     if len(sys.argv) == 1:
         parser.print_help()
@@ -87,7 +91,7 @@ def main(args):
     dummy_coco_dataset = dummy_datasets.get_coco_dataset()
     frame_no =0
     # print( "capturing video")
-    cap = cv2.VideoCapture('/home/rahul/Documents/densepose/DensePoseData/demo_data/style.flv')
+    cap = cv2.VideoCapture(args.input_file)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     # pdb.set_trace()
     grab =1;
