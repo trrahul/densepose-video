@@ -427,7 +427,11 @@ def vis_one_image(
     print('\t-Visualized in {: .3f}s'.format(time.time() - optime))
     output_name = os.path.basename(im_name) + '.' + ext
     filetime = time.time()
-    fig.savefig(os.path.join(output_dir, '{}'.format(output_name)), dpi=dpi)
+    out_dir = os.path.join(output_dir, 'vid')
+    if not os.path.exists(out_dir):
+        os.mkdir(out_dir)
+    out_file = 'file%02d.png' % frame_no
+    fig.savefig(os.path.join(out_dir, out_file), dpi=dpi)
     print('\t-Output file wrote in {: .3f}s'.format(time.time() - filetime))
     plt.close('all')
     return True

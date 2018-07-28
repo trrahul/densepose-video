@@ -23,7 +23,7 @@ import os
 import sys
 import time
 import pdb
-
+import subprocess
 from caffe2.python import workspace
 
 from detectron.core.config import assert_and_infer_cfg
@@ -69,10 +69,10 @@ def parse_args():
     )
     parser.add_argument(
         '--input-file',
-        dest='input_file',
+        dest='input',
         help='Input video file',
-        type=str,
-        default=None
+        default=None,
+        type=str
     )
     if len(sys.argv) == 1:
         parser.print_help()
@@ -91,23 +91,24 @@ def main(args):
     dummy_coco_dataset = dummy_datasets.get_coco_dataset()
     frame_no =0
     # print( "capturing video")
-    cap = cv2.VideoCapture(args.input_file)
+    cap = cv2.VideoCapture(args.input)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     # pdb.set_trace()
     grab =1;
     if (cap.isOpened()== False): 
         print("Error opening video stream or file")
         exit
-    while (cap.isOpened()):
+    while (cap.isOpened() and grab <= total_frames):
         print( "|Processing Frame {0}/{1} ".format(grab,total_frames))
         grab += 1
         captime = time.time()
         ret_val, im = cap.read()
         print('\t-Frame read in{: .3f}s'.format(time.time() - captime))
-        if grab%2 ==0:
+        #skips intermediate frames
+        if grab%2 !=0:
             continue
         #uncomment to resize image
-        # im = cv2.resize(im, (int(1280/1),int(720/1)))
+        im = cv2.resize(im, (int(1280/1),int(720/1)))
         timers = defaultdict(Timer)
         t = time.time()
         with c2_utils.NamedCudaScope(0):
@@ -122,10 +123,10 @@ def main(args):
                 ' \ Note: inference on the first image will be slower than the '
                 'rest (caches and auto-tuning need to warm up)'
             )
-
+        output_name = 'out.mp4'
         ret = vis_utils.vis_one_image(
             im[:, :, ::-1],  # BGR -> RGB for visualization
-            "dummy_name",
+            output_name,
             args.output_dir,
             cls_boxes,
             cls_segms,
@@ -142,9 +143,12 @@ def main(args):
             frame_no = frame_no +1
     cap.release()
     cv2.destroyAllWindows()
-
+    subprocess.call('ffmpeg -framerate 20 -i {}/file%02d.png -c:v libx264 -r 30 -pix_fmt yuv420p vid/out.mp4'
+                    .format(os.path.join(args.output_dir, 'vid')),
+                     shell=True)
 if __name__ == '__main__':
     workspace.GlobalInit(['caffe2', '--caffe2_log_level=0'])
     setup_logging(__name__)
     args = parse_args()
     main(args)
+
