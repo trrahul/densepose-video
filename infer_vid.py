@@ -136,8 +136,7 @@ def main(args):
             box_alpha=0.3,
             show_class=False,
             thresh=0.7,
-            kp_thresh=2,
-            frame_no= frame_no
+            kp_thresh=2
         )
         if ret == True:
             frame_no = frame_no +1
